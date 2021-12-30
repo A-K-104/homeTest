@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+{% block content %}
+
+<body>
+    <section class="indent-1">
+        <!-- Section 1 -->
+        <section>
+            <form>
+                <h1>Add status</h1>
+                <input>
+                <button class="sumbit">Add</button>
+            </form>
+            <table>
+                {%for i in range(l)%}
+                <tr>
+                    <th>
+                        {{i}}
+                    </th>
+                    <th>
+                        <button>remove</button>
+                    </th>
+                    <th>
+                        status
+                    </th>
+                </tr>
+                {%endfor%}
+            </table>
+        </section>
+
+        <!-- Section 2 -->
+        <section>
+            <form>
+                <h1>Add transition</h1>
+                <input>
+                <button class="sumbit">Add</button>
+            </form>
+            <table>
+                {%for i in range(l)%}
+                <tr>
+                    <th>
+                        name:
+                    </th>
+                    <th>
+                        from ->
+                    </th>
+                    <th>
+                        to
+                    </th>
+
+                    <th>
+                        <button>remove</button>
+                    </th>
+
+                </tr>
+                {%endfor%}
+            </table>
+        </section>
+        <section class="indent-3">
+            <button>Reset</button>
+        </section>
+    </section>
+
+
+
+</body>
+<style>
+    .indent-1 {
+        float: left;
+    }
+
+    .indent-1 section {
+        /* width: 50%; */
+        float: left;
+    }
+    .indent-3 {
+        /* width: 50%; */
+        float:inline-end;
+    }
+</style>
+<script>
+    function edit() {
+        // var a = document.getElementById('a');
+        // a.onclick = function () {
+        //     return confirm("Are you sure you want to leave?");
+        // };
+    }
+
+</script>
+{% endblock %}
+
+</html>
