@@ -6,22 +6,22 @@
     <section class="indent-1">
         <!-- Section 1 -->
         <section>
-            <form>
+            <form action="/home" method="POST">
                 <h1>Add status</h1>
-                <input>
+                <input autocomplete="off" name="name">
                 <button class="sumbit">Add</button>
             </form>
             <table>
-                {%for i in range(l)%}
+                {%for status in statuses%}
                 <tr>
                     <th>
-                        {{i}}
+                        {{status.name}}
                     </th>
                     <th>
                         <button>remove</button>
                     </th>
                     <th>
-                        status
+                        [status]
                     </th>
                 </tr>
                 {%endfor%}
@@ -30,22 +30,37 @@
 
         <!-- Section 2 -->
         <section>
-            <form>
+            <form action="/home" method="POST">
                 <h1>Add transition</h1>
-                <input>
+                <input autocomplete="off" name="transition">
+                <label for="cars">Choose a car:</label>
+                , from:
+                <select name="from_user">
+                    <option value=""></option>
+                    {%for status in statuses%}
+                    <option value={{status.name}}> {{status.name}}</option>
+                    {%endfor%}
+                </select>
+                , to:
+                <select name="to_user">
+                    <option value=""></option>
+                    {%for status in statuses%}
+                    <option value={{status.name}}> {{status.name}}</option>
+                    {%endfor%}
+                </select>
                 <button class="sumbit">Add</button>
             </form>
             <table>
-                {%for i in range(l)%}
+                {%for transition in transitions%}
                 <tr>
                     <th>
-                        name:
+                        {{transition.name}}
                     </th>
                     <th>
-                        from ->
+                        {{transition.from_user}}
                     </th>
                     <th>
-                        to
+                        {{transition.to_user}}
                     </th>
 
                     <th>
@@ -73,9 +88,10 @@
         /* width: 50%; */
         float: left;
     }
+
     .indent-3 {
         /* width: 50%; */
-        float:inline-end;
+        float: inline-end;
     }
 </style>
 <script>

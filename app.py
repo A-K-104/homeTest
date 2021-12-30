@@ -3,6 +3,9 @@ from flask import Flask, request, session, render_template, send_file
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import redirect
 
+from classes.status import Status
+from classes.transition import Transition
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'test'
 app.config["SESSION_PERMANENT"] = False
@@ -45,7 +48,14 @@ def baseRoute():
 
 @app.route('/home', methods=['GET', 'POST'])
 def home():
-    return render_template("home.html", l=10)
+    statuses = [Status("name")]
+    transitions = [Transition("name", "user", "to user")]
+    if request.method == "POST":
+        if request.form.__contains__('name'):
+            statuses.append(Status(request.form['name']))
+        elif request.form.__contains__('transition'):
+            statuses.append(Status(request.form['name']))
+    return render_template("home.html", statuses=statuses, transitions=transitions)
 
 
 if __name__ == "__main__":
