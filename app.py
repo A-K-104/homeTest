@@ -1,7 +1,6 @@
 import json
 
-from flask_session import Session
-from flask import Flask, request, session, render_template, send_file
+from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import redirect
 
@@ -10,12 +9,9 @@ from classes.transition import Transition
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'test'
-app.config["SESSION_PERMANENT"] = False
-app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_BINDS'] = {'broadcast': 'sqlite:///data.db'}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-sess = Session(app)
 
 db = SQLAlchemy(app)
 
@@ -56,6 +52,10 @@ def remove():
     elif request.args.__contains__('transition'):
         r = Transition_db.query.get_or_404(request.args['transition'])
         db.session.delete(r)
+    elif request.args.__contains__('reset'):
+        # db.session.delete_all()
+        db.session.query(Transition_db).delete()
+        db.session.query(Status_db).delete()
     db.session.commit()
     return redirect("/home")
 
@@ -74,18 +74,19 @@ def home():
         transitions.append(Transition(temp['name'], temp['from_user'], temp['to_user']))
     if request.method == "POST":
         if request.form.__contains__('name'):
-            if statuses.__contains__(request.form['name']):
+            if not Status(request.form['name']) in statuses:
                 status = Status_db(name=request.form['name'])
                 db.session.add(status)
                 statuses.append(Status(request.form['name']))
+                db.session.commit()
         elif request.form.__contains__('transition'):
-            if transitions.__contains__(request.form['transition']):
+            if not Transition(request.form['transition'], '', '') in transitions:
                 transition = Transition_db(name=request.form['transition'], from_user=request.form['from_user'],
                                            to_user=request.form['to_user'])
                 db.session.add(transition)
                 transitions.append(Transition(request.form['transition'], request.form['from_user'],
                                               request.form['to_user']))
-        db.session.commit()
+                db.session.commit()
     return render_template("home.html", statuses=statuses, transitions=transitions)
 
 

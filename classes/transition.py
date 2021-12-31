@@ -5,11 +5,13 @@ class Transition:
         self.to_user = to_user
 
     def get_map(self):
-        return '{"name"' + ':"' + self.name + '"' +\
-               ', "from_user"' + ':"' + self.from_user +\
+        return '{"name"' + ':"' + self.name + '"' + \
+               ', "from_user"' + ':"' + self.from_user + \
                '"' + ', "to_user"' + ':"' + self.to_user + '"}'
+
+    def __eq__(self, other):
+        return self.name == other.name
 
 
 def decode_json(json_str):
     return Transition(json_str['name'], json_str['from_user'], json_str['to_user'])
-
