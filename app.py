@@ -47,6 +47,19 @@ def baseRoute():
     return redirect("/home")
 
 
+@app.route('/remove', methods=['GET', 'POST'])
+def remove():
+    # print(request.args['name'])
+    if request.args.__contains__('name'):
+        r = Status_db.query.get_or_404(request.args['name'])
+        db.session.delete(r)
+    elif request.args.__contains__('transition'):
+        r = Transition_db.query.get_or_404(request.args['transition'])
+        db.session.delete(r)
+    db.session.commit()
+    return redirect("/home")
+
+
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     names = Status_db.query.all()
@@ -61,15 +74,17 @@ def home():
         transitions.append(Transition(temp['name'], temp['from_user'], temp['to_user']))
     if request.method == "POST":
         if request.form.__contains__('name'):
-            status = Status_db(name=request.form['name'])
-            db.session.add(status)
-            statuses.append(Status(request.form['name']))
+            if statuses.__contains__(request.form['name']):
+                status = Status_db(name=request.form['name'])
+                db.session.add(status)
+                statuses.append(Status(request.form['name']))
         elif request.form.__contains__('transition'):
-            transition = Transition_db(name=request.form['transition'], from_user=request.form['from_user'],
-                                       to_user=request.form['to_user'])
-            db.session.add(transition)
-            transitions.append(Transition(request.form['transition'], request.form['from_user'],
-                                          request.form['to_user']))
+            if transitions.__contains__(request.form['transition']):
+                transition = Transition_db(name=request.form['transition'], from_user=request.form['from_user'],
+                                           to_user=request.form['to_user'])
+                db.session.add(transition)
+                transitions.append(Transition(request.form['transition'], request.form['from_user'],
+                                              request.form['to_user']))
         db.session.commit()
     return render_template("home.html", statuses=statuses, transitions=transitions)
 
