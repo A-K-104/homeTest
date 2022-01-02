@@ -16,7 +16,6 @@ db = SQLAlchemy(app)
 
 
 class Status_db(db.Model):
-    # to init db in terminal type: python ->from app import db->db.create_all()-> exit(). and you are set!
     name = db.Column(db.String(200), primary_key=True)
 
     def __repr__(self):
@@ -95,9 +94,10 @@ def home():
     for tran in trans:
         temp = json.loads(str(tran))
         transitions.append(Transition(temp['name'], temp['from_user'], temp['to_user']))
-        pickedStatus = request.args.get("selected")
-        if (pickedStatus == "" or (pickedStatus is None)) and len(statuses) > 0:
-            pickedStatus = statuses[0].name
+    pickedStatus = request.args.get("selected")
+    if (pickedStatus == "" or (not statuses.__contains__(pickedStatus)) or (pickedStatus is None)) and len(
+            statuses) > 0:
+        pickedStatus = statuses[0].name
     return render_template("home.html", statuses=statuses, transitions=transitions,
                            selected=pickedStatus)
 
