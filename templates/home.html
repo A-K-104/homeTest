@@ -9,17 +9,20 @@
                 <h1>Add status</h1>
                 <input autocomplete="off" name="name">
                 <button class="sumbit">Add</button>
+                <input type="hidden" name="selectedIndex" id="selectedIndex" value="">
             </form>
             <table>
                 <ul>
                     {%for status in statuses%}
                     <tr>
                         <th>
-                            <li><input type="radio" onclick="edit('{{status.name}}')" name="radio" id="radio_{{status.name}}">
+                            <li><input type="radio" onclick="edit('{{status.name}}')" name="radio"
+                                    id="radio_{{status.name}}">
                                 {{status.name}} <br></li>
                         </th>
                         <th>
-                            <button onclick="location.href='/remove?name={{status.name}}'">remove</button>
+                            <button
+                                onclick="location.href='/remove?name={{status.name}}&selectedIndex='+document.getElementById('selectedIndex').value">remove</button>
                         </th>
                         <th>
                             <p id="text_{{status.name}}"></p>
@@ -31,7 +34,7 @@
         </div>
 
         <div class="float-child">
-            <form action=" /add" method="POST">
+            <form action="/add" method="POST">
                 <h1>Add transition</h1>
                 <input autocomplete="off" name="transition">
                 , from:
@@ -44,6 +47,7 @@
                     {%endfor%}
                     {%endif%}
 
+
                 </select>
                 , to:
                 <select name="to_user" id="to_user">
@@ -53,6 +57,7 @@
                     {%endfor%}
                 </select>
                 <button class="sumbit">Add</button>
+                <input type="hidden" name="selectedIndex" id="selectedIndex2" value="">
             </form>
             <table>
                 {%if transitions|length >0%}
@@ -76,7 +81,8 @@
                         </th>
 
                         <th>
-                            <button onclick="location.href='/remove?transition={{transition.name}}'">remove</button>
+                            <button
+                                onclick="location.href='/remove?transition={{transition.name}}&selectedIndex='+document.getElementById('selectedIndex').value">remove</button>
                         </th>
                     </tr>
                     {%endfor%}
@@ -126,12 +132,17 @@
     }
 </style>
 <script>
-
+    var markedStatus = false;
     "{%for status in statuses %}"
-    if(document.getElementById("radio_{{status.name}}").checked==true){
+    if (document.getElementById("radio_{{status.name}}").checked == true) {
         edit("{{status.name}}");
+        markedStatus = true;
     }
     "{%endfor%}"
+    if (!markedStatus) {
+        document.getElementById("radio_{{selected}}").checked = true
+        edit("{{selected}}");
+    }
     function manageDropDown() {
         var selectObject = document.getElementById("to_user");
         var selectObject2 = document.getElementById("from_user");
@@ -157,6 +168,8 @@
         document.getElementById("text_{{status.name}}").innerHTML = "[ORPHAN]";
         "{%endfor%}"
         document.getElementById(('text_' + id)).innerHTML = "[INIT]";
+        document.getElementById("selectedIndex").value = id;
+        document.getElementById("selectedIndex2").value = id;
         getFinalTransition(getListOfTransitions(), id);
     }
     function getListOfTransitions() {

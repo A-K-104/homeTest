@@ -63,7 +63,7 @@ def remove():
         db.session.query(Transition_db).delete()
         db.session.query(Status_db).delete()
     db.session.commit()
-    return redirect("/home")
+    return redirect(f"/home?selected={request.args['selectedIndex']}")
 
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -80,7 +80,7 @@ def add():
                                                to_user=request.form['to_user'])
                     db.session.add(transition)
         db.session.commit()
-    return redirect("/home")
+    return redirect(f"/home?selected={request.form['selectedIndex']}")
 
 
 @app.route('/home', methods=['GET', 'POST'])
@@ -95,7 +95,11 @@ def home():
     for tran in trans:
         temp = json.loads(str(tran))
         transitions.append(Transition(temp['name'], temp['from_user'], temp['to_user']))
-    return render_template("home.html", statuses=statuses, transitions=transitions)
+        pickedStatus = request.args.get("selected")
+        if (pickedStatus == "" or (pickedStatus is None)) and len(statuses) > 0:
+            pickedStatus = statuses[0].name
+    return render_template("home.html", statuses=statuses, transitions=transitions,
+                           selected=pickedStatus)
 
 
 if __name__ == "__main__":
