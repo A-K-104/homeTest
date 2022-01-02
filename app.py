@@ -8,7 +8,6 @@ from classes.Transition import Transition
 from classes.status import Status
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'test'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_BINDS'] = {'broadcast': 'sqlite:///data.db'}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -31,8 +30,8 @@ class Transition_db(db.Model):
 
     def __repr__(self):
         return '{' + \
-               f'"name": "{self.name}",' +\
-               f'"from_user": "{self.from_user}",'\
+               f'"name": "{self.name}",' + \
+               f'"from_user": "{self.from_user}",' \
                + f'"to_user": "{self.to_user}"' + \
                '} '
 
@@ -49,7 +48,6 @@ def baseRoute():
 
 @app.route('/remove', methods=['GET', 'POST'])
 def remove():
-    # print(request.args['name'])
     if request.args.__contains__('name'):
         r = Status_db.query.get_or_404(request.args['name'])
         db.session.delete(r)
@@ -57,7 +55,6 @@ def remove():
         r = Transition_db.query.get_or_404(request.args['transition'])
         db.session.delete(r)
     elif request.args.__contains__('reset'):
-        # db.session.delete_all()
         db.session.query(Transition_db).delete()
         db.session.query(Status_db).delete()
     db.session.commit()
@@ -68,21 +65,16 @@ def remove():
 def add():
     if request.method == "POST":
         if request.form.__contains__('name'):
-            if not db.session.query(Status_db.name).filter_by(name=request.form['name']).first() is not None:
+            if db.session.query(Status_db.name).filter_by(name=request.form['name']).first() is None:
                 status = Status_db(name=request.form['name'])
                 db.session.add(status)
-                db.session.commit()
         elif request.form.__contains__('transition'):
-            if not db.session.query(Transition_db.name).filter_by(name=request.form['transition']).first() is not None:
-                transition = Transition_db(name=request.form['transition'], from_user=request.form['from_user'],
-                                           to_user=request.form['to_user'])
-                db.session.add(transition)
-                db.session.commit()
-    return redirect("/home")
-
-
-@app.route('/pick', methods=['GET', 'POST'])
-def pick():
+            if db.session.query(Transition_db.name).filter_by(name=request.form['transition']).first() is None:
+                if request.form['from_user'] != "" and request.form['to_user'] != "":
+                    transition = Transition_db(name=request.form['transition'], from_user=request.form['from_user'],
+                                               to_user=request.form['to_user'])
+                    db.session.add(transition)
+        db.session.commit()
     return redirect("/home")
 
 
@@ -92,7 +84,6 @@ def home():
     trans = Transition_db.query.all()
     statuses = []
     transitions = []
-
     for name in names:
         temp = json.loads(str(name))
         statuses.append(Status(temp['name']))

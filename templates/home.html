@@ -3,9 +3,8 @@
 {% block content %}
 
 <body>
-    <section class="indent-1">
-        <!-- Section 1 -->
-        <section>
+    <div class="float-container">
+        <div class="float-child">
             <form action="/add" method="POST">
                 <h1>Add status</h1>
                 <input autocomplete="off" name="name">
@@ -29,15 +28,14 @@
                     {%endfor%}
                 </ul>
             </table>
-        </section>
+        </div>
 
-        <!-- Section 2 -->
-        <section>
+        <div class="float-child">
             <form action=" /add" method="POST">
                 <h1>Add transition</h1>
                 <input autocomplete="off" name="transition">
                 , from:
-                <select name="from_user">
+                <select name="from_user" id="from_user" onchange="manageDropDown()">
                     <option value=""></option>
                     {%if statuses|length >0%}
 
@@ -48,7 +46,7 @@
 
                 </select>
                 , to:
-                <select name="to_user">
+                <select name="to_user" id="to_user">
                     <option value=""></option>
                     {%for status in statuses%}
                     <option value={{status.name}}> {{status.name}}</option>
@@ -57,18 +55,21 @@
                 <button class="sumbit">Add</button>
             </form>
             <table>
+                {%if transitions|length >0%}
                 <ul>
-                    {%if transitions|length >0%}
                     {%for transition in transitions%}
-
-
                     <tr>
 
+
                         <th>
-                            {{transition.name}}
+                            <li>
+                                {{transition.name}}:
+                            </li>
                         </th>
+
+
                         <th>
-                            {{transition.from_user}}
+                            {{transition.from_user}} ->
                         </th>
                         <th>
                             {{transition.to_user}}
@@ -77,36 +78,75 @@
                         <th>
                             <button onclick="location.href='/remove?transition={{transition.name}}'">remove</button>
                         </th>
-
                     </tr>
                     {%endfor%}
                     {%endif%}
                 </ul>
             </table>
-        </section>
-    </section>
-    <button onclick="location.href='/remove?reset=reset'">Reset</button>
-
+        </div>
+    </div>
+    <div class="float-child2">
+        <button onclick="location.href='/remove?reset=reset'" class ="button1">Reset</button>
+    </div>
 
 
 </body>
 <style>
-    .indent-1 {
-        float: left;
+    .float-container {
+        border: 3px solid #fff;
+        padding: 20px;
+        margin: auto;
     }
 
-    .indent-1 section {
-        /* width: 50%; */
+    .float-child {
+        width: 30%;
+        margin: auto;
         float: left;
+        margin: auto;
+        padding: 20px;
     }
-
-    .indent-3 {
-        /* width: 50%; */
-        float: inline-end;
+    .float-child2 {
+        width: 10%;
+        clear: both;
+        margin: auto;
+        padding: 20px;
     }
+    .button1 {
+  background-color: #ff0000;
+  border: none;
+  color: rgb(0, 0, 0);
+  /* padding: 20px; */
+  height: 100px;
+  width: 100px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 4px;
+  border-radius: 50%;
+}
 </style>
 <script>
-
+    function manageDropDown() {
+        var selectObject = document.getElementById("to_user");
+        var selectObject2 = document.getElementById("from_user");
+        if (selectObject2.value != "") {
+            for (var i = 0; i < selectObject.length; i++) {
+                if (selectObject[i].value == selectObject2.value) {
+                    selectObject.remove(i);
+                    break;
+                }
+            }
+        }
+        else {
+            selectObject.innerHTML = "";
+            for (var i = 0; i < selectObject2.length; i++) {
+                var opt = document.createElement('option');
+                opt.innerHTML = selectObject2[i].value;
+                selectObject.appendChild(opt);
+            }
+        }
+    }
     function edit(id) {
         "{%for status in statuses %}"
         document.getElementById("text_{{status.name}}").innerHTML = "[ORPHAN]";
@@ -122,19 +162,24 @@
         return list;
     }
     function getFinalTransition(transition_lst, beginning) {
-
-        for (i = 0; i < transition_lst.length; i++) {
+        var havePath = false;
+        for (var i = 0; i < transition_lst.length; i++) {
 
             if (beginning == transition_lst[i][0]) {
-                var temp_list =transition_lst;
-                temp_list = temp_list.filter(function(e) { return e !== transition_lst[i] })
-                if(document.getElementById("text_"+transition_lst[i][1]).innerHTML == "[ORPHAN]"){
-                    document.getElementById("text_"+transition_lst[i][1]).innerHTML = ""
+                var temp_list = transition_lst;
+                temp_list = temp_list.filter(function (e) { return e !== transition_lst[i] });
+                if (document.getElementById("text_" + transition_lst[i][1]).innerHTML == "[ORPHAN]") {
+                    document.getElementById("text_" + transition_lst[i][1]).innerHTML = ""
                 }
-                return getFinalTransition(temp_list, transition_lst[i][1])
+                getFinalTransition(temp_list, transition_lst[i][1]);
+                havePath = true;
             }
         }
-        document.getElementById("text_"+beginning).innerHTML += " [FINAL]";
+        if (!havePath) {
+            if (!document.getElementById("text_" + beginning).innerHTML.includes("[FINAL]")) {
+                document.getElementById("text_" + beginning).innerHTML += " [FINAL]";
+            }
+        }
     }
 </script>
 {% endblock %}
