@@ -51,6 +51,11 @@ def remove():
     if request.args.__contains__('name'):
         r = Status_db.query.get_or_404(request.args['name'])
         db.session.delete(r)
+        trans = Transition_db.query.all()
+        for tran in trans:
+            if (tran.to_user == request.args['name']) or (tran.from_user == request.args['name']):
+                r = Transition_db.query.get_or_404(tran.name)
+                db.session.delete(r)
     elif request.args.__contains__('transition'):
         r = Transition_db.query.get_or_404(request.args['transition'])
         db.session.delete(r)
