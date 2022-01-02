@@ -6,40 +6,46 @@
     <section class="indent-1">
         <!-- Section 1 -->
         <section>
-            <form action="/home" method="POST">
+            <form action="/add" method="POST">
                 <h1>Add status</h1>
                 <input autocomplete="off" name="name">
                 <button class="sumbit">Add</button>
             </form>
             <table>
-                {%for status in statuses%}
-                <tr>
-                    <th>
-                        {{status.name}}
-                    </th>
-                    <th>
-                        <button onclick="location.href='/remove?name={{status.name}}'" >remove</button>
-                    </th>
-                    <th>
-                        [status]
-                    </th>
-                </tr>
-                {%endfor%}
+                <ul>
+                    {%for status in statuses%}
+                    <tr>
+                        <th>
+                            <li onclick="edit('{{status.name}}')"><input type="radio" name="status_name">
+                                {{status.name}} <br></li>
+                        </th>
+                        <th>
+                            <button onclick="location.href='/remove?name={{status.name}}'">remove</button>
+                        </th>
+                        <th>
+                            <p id="text_{{status.name}}"></p>
+                        </th>
+                    </tr>
+                    {%endfor%}
+                </ul>
             </table>
         </section>
 
         <!-- Section 2 -->
         <section>
-            <form action="/home" method="POST">
+            <form action=" /add" method="POST">
                 <h1>Add transition</h1>
                 <input autocomplete="off" name="transition">
-                <label for="cars">Choose a car:</label>
                 , from:
                 <select name="from_user">
                     <option value=""></option>
+                    {%if statuses|length >0%}
+
                     {%for status in statuses%}
                     <option value={{status.name}}> {{status.name}}</option>
                     {%endfor%}
+                    {%endif%}
+
                 </select>
                 , to:
                 <select name="to_user">
@@ -51,32 +57,35 @@
                 <button class="sumbit">Add</button>
             </form>
             <table>
-                {%for transition in transitions%}
-                <tr>
-                    <th>
-                        {{transition.name}}
-                    </th>
-                    <th>
-                        {{transition.from_user}}
-                    </th>
-                    <th>
-                        {{transition.to_user}}
-                    </th>
+                <ul>
+                    {%if transitions|length >0%}
+                    {%for transition in transitions%}
 
-                    <th>
-                        <button onclick="location.href='/remove?transition={{transition.name}}'" >remove</button>
-                    </th>
 
-                </tr>
-                {%endfor%}
+                    <tr>
+
+                        <th>
+                            {{transition.name}}
+                        </th>
+                        <th>
+                            {{transition.from_user}}
+                        </th>
+                        <th>
+                            {{transition.to_user}}
+                        </th>
+
+                        <th>
+                            <button onclick="location.href='/remove?transition={{transition.name}}'">remove</button>
+                        </th>
+
+                    </tr>
+                    {%endfor%}
+                    {%endif%}
+                </ul>
             </table>
         </section>
-        <!-- <section class="indent-3"> -->
-            <!-- <button>Reset</button> -->
-        <!-- </section> -->
-
     </section>
-    <button onclick="location.href='/remove?reset=reset'" >Reset</button>
+    <button onclick="location.href='/remove?reset=reset'">Reset</button>
 
 
 
@@ -97,13 +106,36 @@
     }
 </style>
 <script>
-    function edit() {
-        // var a = document.getElementById('a');
-        // a.onclick = function () {
-        //     return confirm("Are you sure you want to leave?");
-        // };
-    }
 
+    function edit(id) {
+        "{%for status in statuses %}"
+        document.getElementById("text_{{status.name}}").innerHTML = "[ORPHAN]";
+        "{%endfor%}"
+        document.getElementById(('text_' + id)).innerHTML = "[INIT]";
+        getFinalTransition(getListOfTransitions(), id);
+    }
+    function getListOfTransitions() {
+        var list = []
+        "{%for transition in transitions %}"
+        list.push(["{{transition.from_user}}", "{{transition.to_user}}"])
+        "{%endfor%}"
+        return list;
+    }
+    function getFinalTransition(transition_lst, beginning) {
+
+        for (i = 0; i < transition_lst.length; i++) {
+
+            if (beginning == transition_lst[i][0]) {
+                var temp_list =transition_lst;
+                temp_list = temp_list.filter(function(e) { return e !== transition_lst[i] })
+                if(document.getElementById("text_"+transition_lst[i][1]).innerHTML == "[ORPHAN]"){
+                    document.getElementById("text_"+transition_lst[i][1]).innerHTML = ""
+                }
+                return getFinalTransition(temp_list, transition_lst[i][1])
+            }
+        }
+        document.getElementById("text_"+beginning).innerHTML += " [FINAL]";
+    }
 </script>
 {% endblock %}
 

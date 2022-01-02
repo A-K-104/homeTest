@@ -4,8 +4,8 @@ from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import redirect
 
+from classes.Transition import Transition
 from classes.status import Status
-from classes.transition import Transition
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'test'
@@ -30,7 +30,11 @@ class Transition_db(db.Model):
     to_user = db.Column(db.String(200))
 
     def __repr__(self):
-        return '{' + f'"name": "{self.name}",' + f'"from_user": "{self.from_user}",' + f'"to_user": "{self.to_user}"' + '}'
+        return '{' + \
+               f'"name": "{self.name}",' +\
+               f'"from_user": "{self.from_user}",'\
+               + f'"to_user": "{self.to_user}"' + \
+               '} '
 
 
 @app.before_first_request
@@ -60,33 +64,41 @@ def remove():
     return redirect("/home")
 
 
+@app.route('/add', methods=['GET', 'POST'])
+def add():
+    if request.method == "POST":
+        if request.form.__contains__('name'):
+            if not db.session.query(Status_db.name).filter_by(name=request.form['name']).first() is not None:
+                status = Status_db(name=request.form['name'])
+                db.session.add(status)
+                db.session.commit()
+        elif request.form.__contains__('transition'):
+            if not db.session.query(Transition_db.name).filter_by(name=request.form['transition']).first() is not None:
+                transition = Transition_db(name=request.form['transition'], from_user=request.form['from_user'],
+                                           to_user=request.form['to_user'])
+                db.session.add(transition)
+                db.session.commit()
+    return redirect("/home")
+
+
+@app.route('/pick', methods=['GET', 'POST'])
+def pick():
+    return redirect("/home")
+
+
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     names = Status_db.query.all()
     trans = Transition_db.query.all()
     statuses = []
     transitions = []
+
     for name in names:
         temp = json.loads(str(name))
         statuses.append(Status(temp['name']))
     for tran in trans:
         temp = json.loads(str(tran))
         transitions.append(Transition(temp['name'], temp['from_user'], temp['to_user']))
-    if request.method == "POST":
-        if request.form.__contains__('name'):
-            if not Status(request.form['name']) in statuses:
-                status = Status_db(name=request.form['name'])
-                db.session.add(status)
-                statuses.append(Status(request.form['name']))
-                db.session.commit()
-        elif request.form.__contains__('transition'):
-            if not Transition(request.form['transition'], '', '') in transitions:
-                transition = Transition_db(name=request.form['transition'], from_user=request.form['from_user'],
-                                           to_user=request.form['to_user'])
-                db.session.add(transition)
-                transitions.append(Transition(request.form['transition'], request.form['from_user'],
-                                              request.form['to_user']))
-                db.session.commit()
     return render_template("home.html", statuses=statuses, transitions=transitions)
 
 
