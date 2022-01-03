@@ -61,6 +61,8 @@ def remove():
     elif request.args.__contains__('reset'):
         db.session.query(Transition_db).delete()
         db.session.query(Status_db).delete()
+        db.session.commit()
+        return redirect(f"/home")
     db.session.commit()
     return redirect(f"/home?selected={request.args['selectedIndex']}")
 
